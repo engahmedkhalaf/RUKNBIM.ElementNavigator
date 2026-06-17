@@ -1,0 +1,17 @@
+# .NET / Visual Studio ignores
+bin/
+obj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Navisworks backups
+*.nwf.bak
+*.nwd.bak
+
+# Temp folders
+.vs/
