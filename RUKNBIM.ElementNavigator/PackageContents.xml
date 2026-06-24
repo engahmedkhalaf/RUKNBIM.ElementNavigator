@@ -2,8 +2,13 @@
 <ApplicationPackage SchemaVersion="1.0" AutodeskProduct="Navisworks" Name="RUKNBIM Element Navigator" AppVersion="1.0.0" Author="RUKNBIM" ProductCode="{C2A83257-2D98-4B52-82C3-A88E1FDB1C2A}">
   <CompanyDetails Name="RUKNBIM" />
   <Components Description="Navisworks Plugin">
-    <!-- Nw21 is Navisworks 2024. Nw19 mathematically blocks 2024 from loading this. -->
-    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw15" SeriesMax="Nw26" />
-    <ComponentEntry AppName="RUKNBIM.ElementNavigator" AppType="ManagedPlugin" Version="1.0.0" ModuleName="./Contents/RUKNBIM.ElementNavigator/RUKNBIM.ElementNavigator.dll" AppDescription="Element Navigator Addin" />
+    <!--
+      Supported Navisworks versions:
+        Navisworks 2024 = Nw21
+        Navisworks 2025 = Nw22
+        Navisworks 2026 = Nw23
+    -->
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw21" SeriesMax="Nw23" />
+    <ComponentEntry AppName="RUKNBIM.ElementNavigator" AppType="ManagedPlugin" Version="1.0.0" ModuleName="./Contents/RUKNBIM.ElementNavigator/RUKNBIM.ElementNavigator.dll" AppDescription="Element Navigator Addin (Navisworks 2024 / 2025 / 2026)" />
   </Components>
 </ApplicationPackage>

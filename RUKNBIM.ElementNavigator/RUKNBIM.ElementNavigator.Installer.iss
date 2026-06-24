@@ -1,25 +1,57 @@
+; ----------------------------------------------------------------------------
+;  RUKNBIM Element Navigator - Inno Setup script
+;  Build the project first (Release or Debug); then compile this .iss with ISCC
+; ----------------------------------------------------------------------------
+
+#define MyAppName "RUKNBIM Element Navigator for Navisworks"
+#define MyAppVersion "1.0.0"
+#define MyAppPublisher "RUKNBIM"
+#define MyAppURL "https://rukn-bim-website-opka.vercel.app/#top"
+#define BuildConfig "Debug"
+
 [Setup]
-AppName=RUKNBIM Element Navigator for Navisworks
-AppVersion=1.0.0
-AppPublisher=RUKNBIM
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
 ; Install to the current user's ApplicationPlugins folder
 DefaultDirName={userappdata}\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle
 DisableDirPage=yes
 DefaultGroupName=RUKNBIM Element Navigator
 DisableProgramGroupPage=yes
-OutputBaseFilename=RUKNBIM_ElementNavigator_Setup
+OutputBaseFilename=RUKNBIM_ElementNavigator_Setup_{#MyAppVersion}
 Compression=lzma
 SolidCompression=yes
-; Require lowest privileges so it installs in AppData without UAC prompts
+; Run per-user, no UAC prompt
 PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=bin\Installer
+ArchitecturesInstallIn64BitMode=x64
+WizardStyle=modern
+SetupIconFile=Images\ElementNavigatorAddin_16.ico
+UninstallDisplayIcon={app}\Contents\RUKNBIM.ElementNavigator\Images\ElementNavigatorAddin_16.ico
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-; Copy the PackageContents.xml directly into the bundle root
+; Bundle manifest at the bundle root
 Source: "PackageContents.xml"; DestDir: "{app}"; Flags: ignoreversion
-; Copy the compiled plugin files into the exact Contents structure Navisworks requires
-Source: "bin\Debug\*"; DestDir: "{app}\Contents\RUKNBIM.ElementNavigator"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; Compiled plugin output (DLL + dependencies + Images subfolder)
+Source: "bin\{#BuildConfig}\*"; DestDir: "{app}\Contents\RUKNBIM.ElementNavigator"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs
+
+; Ribbon icon folder (Navisworks looks for {PluginId}.{Developer}\*)
+Source: "ElementNavigatorAddin.RUKN\*"; \
+    DestDir: "{app}\Contents\RUKNBIM.ElementNavigator\ElementNavigatorAddin.RUKN"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Run]
+Filename: "{#MyAppURL}"; Description: "Visit RUKNBIM website"; \
+    Flags: shellexec postinstall skipifsilent unchecked
 
 [UninstallDelete]
-; Ensure the entire bundle folder is removed on uninstall
+; Remove the entire bundle folder on uninstall
 Type: filesandordirs; Name: "{app}"
