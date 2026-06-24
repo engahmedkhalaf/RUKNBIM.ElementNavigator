@@ -41,10 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Images\ElementNavigatorAddin_16.png.ico">
+    <None Update="Images\ElementNavigatorAddin_16.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Images\ElementNavigatorAddin_32.png.png">
+    <None Update="Images\ElementNavigatorAddin_32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">
@@ -53,11 +53,12 @@
     </None>
   </ItemGroup>
 
-  <!-- Auto-Deploy to Navisworks ProgramData ApplicationPlugins Folder -->
+  <!-- Auto-Deploy to Navisworks per-user AppData ApplicationPlugins Folder -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;$(ProgramData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\&quot; /Y /I /S" />
-    <Exec Command="xcopy &quot;$(ProjectDir)PackageContents.xml&quot; &quot;$(ProgramData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\&quot; /Y /I" />
-    <Exec Command="if exist &quot;$(ProjectDir)Images\*.*&quot; xcopy &quot;$(ProjectDir)Images\*.*&quot; &quot;$(ProgramData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\Images\&quot; /Y /I /S" />
+    <Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\&quot; /Y /I /S" />
+    <Exec Command="xcopy &quot;$(ProjectDir)PackageContents.xml&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\&quot; /Y /I" />
+    <Exec Command="if exist &quot;$(ProjectDir)Images\*.*&quot; xcopy &quot;$(ProjectDir)Images\*.*&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\Images\&quot; /Y /I /S" />
+    <Exec Command="if exist &quot;$(ProjectDir)ElementNavigatorAddin.RUKN\*.*&quot; xcopy &quot;$(ProjectDir)ElementNavigatorAddin.RUKN\*.*&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\ElementNavigatorAddin.RUKN\&quot; /Y /I /S" />
   </Target>
 
 </Project>

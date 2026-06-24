@@ -4,27 +4,34 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 
 namespace RUKNBIM.ElementNavigator
 {
     public partial class ElementNavigatorViewModel : ObservableObject
     {
+        private const string RepoUrl = "https://github.com/engahmedkhalaf/RUKNBIM.ElementNavigator";
+
         private readonly NavisworksSearchEngine _searchEngine;
         private readonly IDataService _dataService;
 
-        [ObservableProperty]
-        private string _elementIdsInput;
+        [ObservableProperty] private string _elementIdsInput;
+        [ObservableProperty] private bool _isolateSelected;
+        [ObservableProperty] private bool _zoomToSelected;
+        [ObservableProperty] private string _statusMessage = "Ready to search Revit Element IDs";
+        [ObservableProperty] private int _foundCount;
+        [ObservableProperty] private int _missingCount;
+        [ObservableProperty] private int _selectedCount;
+        [ObservableProperty] private string _version;
+        [ObservableProperty] private string _modelName = "(no model loaded)";
 
-        [ObservableProperty]
-        private bool _isolateSelected;
-
-        [ObservableProperty]
-        private bool _zoomToSelected;
-
-        private List<string> _lastFoundIds = new List<string>();
-        private List<string> _lastMissingIds = new List<string>();
+        public ObservableCollection<string> FoundIds { get; } = new ObservableCollection<string>();
+        public ObservableCollection<string> MissingIds { get; } = new ObservableCollection<string>();
 
         public ElementNavigatorViewModel()
         {
@@ -32,6 +39,22 @@ namespace RUKNBIM.ElementNavigator
             ZoomToSelected = true;
             _searchEngine = new NavisworksSearchEngine();
             _dataService = new ExcelDataService();
+            Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+            RefreshModelInfo();
+        }
+
+        private void RefreshModelInfo()
+        {
+            try
+            {
+                var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+                if (doc == null) return;
+                ModelName = string.IsNullOrEmpty(doc.CurrentFileName)
+                    ? "(unsaved)"
+                    : Path.GetFileName(doc.CurrentFileName);
+                SelectedCount = doc.CurrentSelection?.SelectedItems?.Count ?? 0;
+            }
+            catch { /* Navisworks may not be ready yet */ }
         }
 
         [RelayCommand]
@@ -39,7 +62,7 @@ namespace RUKNBIM.ElementNavigator
         {
             if (string.IsNullOrWhiteSpace(ElementIdsInput))
             {
-                MessageBox.Show("Please enter Element IDs to search.", "Element Navigator", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = "Please enter Element IDs to search.";
                 return;
             }
 
@@ -51,25 +74,36 @@ namespace RUKNBIM.ElementNavigator
 
             if (!ids.Any()) return;
 
+            StatusMessage = $"Searching {ids.Count} IDs...";
             var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
-            
-            // Build cache for performance
-            _searchEngine.BuildCache(doc);
 
-            // Find elements
+            _searchEngine.BuildCache(doc);
             var items = _searchEngine.FindElements(ids);
-            
-            // Highlight and perform actions
             NavisworksActions.HighlightAndSelect(doc, items, IsolateSelected, ZoomToSelected);
 
-            // Track found vs missing for reporting
-            _lastMissingIds = _searchEngine.GetMissingIds(ids);
-            _lastFoundIds = ids.Except(_lastMissingIds).ToList();
+            var missing = _searchEngine.GetMissingIds(ids);
+            var found = ids.Except(missing).ToList();
 
-            int foundCount = _lastFoundIds.Count;
-            int missingCount = _lastMissingIds.Count;
+            FoundIds.Clear();
+            foreach (var id in found) FoundIds.Add(id);
+            MissingIds.Clear();
+            foreach (var id in missing) MissingIds.Add(id);
 
-            MessageBox.Show($"Search Complete.\nFound: {foundCount}\nMissing: {missingCount}", "Element Navigator", MessageBoxButton.OK, MessageBoxImage.Information);
+            FoundCount = found.Count;
+            MissingCount = missing.Count;
+            RefreshModelInfo();
+
+            StatusMessage = $"Completed. Found {FoundCount} of {ids.Count} elements.";
+        }
+
+        [RelayCommand]
+        private void RestoreFullModel()
+        {
+            var doc = Autodesk.Navisworks.Api.Application.ActiveDocument;
+            if (doc == null) return;
+            NavisworksActions.RestoreFullModel(doc);
+            StatusMessage = "Full model restored.";
+            RefreshModelInfo();
         }
 
         [RelayCommand]
@@ -87,9 +121,11 @@ namespace RUKNBIM.ElementNavigator
                 {
                     var ids = _dataService.ImportIdsFromExcel(openFileDialog.FileName);
                     ElementIdsInput = string.Join(Environment.NewLine, ids);
+                    StatusMessage = $"Imported {ids.Count()} IDs from Excel.";
                 }
                 catch (Exception ex)
                 {
+                    StatusMessage = $"Import failed: {ex.Message}";
                     MessageBox.Show($"Error reading Excel file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -98,9 +134,9 @@ namespace RUKNBIM.ElementNavigator
         [RelayCommand]
         private void ExportReport()
         {
-            if (!_lastFoundIds.Any() && !_lastMissingIds.Any())
+            if (FoundIds.Count == 0 && MissingIds.Count == 0)
             {
-                MessageBox.Show("No search has been performed yet to generate a report.", "Export Report", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = "Nothing to export — run a search first.";
                 return;
             }
 
@@ -115,14 +151,35 @@ namespace RUKNBIM.ElementNavigator
             {
                 try
                 {
-                    _dataService.ExportReportToExcel(saveFileDialog.FileName, _lastFoundIds, _lastMissingIds);
-                    MessageBox.Show("Report exported successfully.", "Export Report", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _dataService.ExportReportToExcel(saveFileDialog.FileName, FoundIds.ToList(), MissingIds.ToList());
+                    StatusMessage = "Report exported successfully.";
                 }
                 catch (Exception ex)
                 {
+                    StatusMessage = $"Export failed: {ex.Message}";
                     MessageBox.Show($"Error exporting report: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        [RelayCommand]
+        private void About()
+        {
+            MessageBox.Show(
+                $"RUKNBIM Element Navigator\nVersion {Version}\n\nA Navisworks addin for fast Revit Element ID search.\n\n© RUKNBIM",
+                "About", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private void Help() => OpenUrl($"{RepoUrl}#readme");
+
+        [RelayCommand]
+        private void Update() => OpenUrl($"{RepoUrl}/releases");
+
+        private static void OpenUrl(string url)
+        {
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch { /* swallow */ }
         }
     }
 }

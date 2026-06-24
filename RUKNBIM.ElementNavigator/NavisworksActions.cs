@@ -6,6 +6,12 @@ namespace RUKNBIM.ElementNavigator
 {
     public static class NavisworksActions
     {
+        public static void RestoreFullModel(Document doc)
+        {
+            doc.CurrentSelection.Clear();
+            doc.Models.ResetAllHidden();
+        }
+
         public static void HighlightAndSelect(Document doc, ModelItemCollection items, bool isolate, bool zoom)
         {
             // Clear current selection
