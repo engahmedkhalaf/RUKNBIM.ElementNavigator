@@ -8,14 +8,22 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace RUKNBIM.ElementNavigator
 {
     public partial class ElementNavigatorViewModel : ObservableObject
     {
-        private const string RepoUrl = "https://github.com/engahmedkhalaf/RUKNBIM.ElementNavigator";
+        private const string RepoOwner = "engahmedkhalaf";
+        private const string RepoName = "RUKNBIM.ElementNavigator";
+        private const string RepoUrl = "https://github.com/" + RepoOwner + "/" + RepoName;
+        private const string LatestReleaseApi = "https://api.github.com/repos/" + RepoOwner + "/" + RepoName + "/releases/latest";
 
         private readonly NavisworksSearchEngine _searchEngine;
         private readonly IDataService _dataService;
@@ -29,6 +37,8 @@ namespace RUKNBIM.ElementNavigator
         [ObservableProperty] private int _selectedCount;
         [ObservableProperty] private string _version;
         [ObservableProperty] private string _modelName = "(no model loaded)";
+        [ObservableProperty] private string _updateStatus = "Checking for updates...";
+        [ObservableProperty] private Brush _updateStatusBrush = Brushes.Gray;
 
         public ObservableCollection<string> FoundIds { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> MissingIds { get; } = new ObservableCollection<string>();
@@ -39,8 +49,9 @@ namespace RUKNBIM.ElementNavigator
             ZoomToSelected = true;
             _searchEngine = new NavisworksSearchEngine();
             _dataService = new ExcelDataService();
-            Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+            Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
             RefreshModelInfo();
+            _ = CheckForUpdatesAsync();
         }
 
         private void RefreshModelInfo()
@@ -55,6 +66,58 @@ namespace RUKNBIM.ElementNavigator
                 SelectedCount = doc.CurrentSelection?.SelectedItems?.Count ?? 0;
             }
             catch { /* Navisworks may not be ready yet */ }
+        }
+
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                using (var http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) })
+                {
+                    http.DefaultRequestHeaders.UserAgent.ParseAdd("RUKNBIM-ElementNavigator");
+                    http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+                    var json = await http.GetStringAsync(LatestReleaseApi);
+
+                    var match = Regex.Match(json, "\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
+                    if (!match.Success)
+                    {
+                        SetUpdateStatus("Update check unavailable", Brushes.Gray);
+                        return;
+                    }
+
+                    var tag = match.Groups[1].Value;
+                    var latest = ParseVersion(tag);
+                    var current = ParseVersion(Version);
+
+                    if (latest > current)
+                        SetUpdateStatus($"Update available: {tag}", Brushes.OrangeRed);
+                    else
+                        SetUpdateStatus("Plugin is up to date", Brushes.LimeGreen);
+                }
+            }
+            catch
+            {
+                SetUpdateStatus("Could not check for updates", Brushes.Gray);
+            }
+        }
+
+        private void SetUpdateStatus(string text, Brush brush)
+        {
+            if (System.Windows.Application.Current?.Dispatcher is { } d && !d.CheckAccess())
+                d.Invoke(() => { UpdateStatus = text; UpdateStatusBrush = brush; });
+            else
+            {
+                UpdateStatus = text;
+                UpdateStatusBrush = brush;
+            }
+        }
+
+        private static Version ParseVersion(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return new Version(0, 0, 0, 0);
+            var cleaned = Regex.Replace(s, "[^0-9.]", "");
+            return System.Version.TryParse(cleaned, out var v) ? v : new Version(0, 0, 0, 0);
         }
 
         [RelayCommand]
@@ -166,7 +229,7 @@ namespace RUKNBIM.ElementNavigator
         private void About()
         {
             MessageBox.Show(
-                $"RUKNBIM Element Navigator\nVersion {Version}\n\nA Navisworks addin for fast Revit Element ID search.\n\n© RUKNBIM",
+                $"RUKNBIM Element Navigator\nVersion {Version}\n\nA Navisworks addin for fast Revit Element ID search.\n\nPrepared by: Ahmed Khalaf (BIM Manager)\nMobile: +966542554127\nEmail: engkhalaf7@gmail.com",
                 "About", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -174,7 +237,7 @@ namespace RUKNBIM.ElementNavigator
         private void Help() => OpenUrl($"{RepoUrl}#readme");
 
         [RelayCommand]
-        private void Update() => OpenUrl($"{RepoUrl}/releases");
+        private void Update() => OpenUrl("https://github.com/engahmedkhalaf/RUKNBIM_ElementNavigator_Setup_1.0.0");
 
         private static void OpenUrl(string url)
         {

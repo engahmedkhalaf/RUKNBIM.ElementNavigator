@@ -142,41 +142,45 @@
                                FontSize="16" FontWeight="Bold" Foreground="#00695C"
                                Margin="0,0,0,8"/>
 
-                    <Border Grid.Row="1" Background="White" BorderBrush="#DDD"
-                            BorderThickness="1" CornerRadius="4" Padding="8">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="90" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                    <Border Grid.Row="1" Background="#0D1B2A" BorderBrush="#1B263B"
+                            BorderThickness="1" CornerRadius="4" Padding="12">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Version: " FontWeight="Bold" Foreground="White"/>
+                                <TextBlock Text="{Binding Version}" Foreground="White"/>
+                            </StackPanel>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="License:"
-                                       Style="{StaticResource InfoLabel}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Active"
-                                       Style="{StaticResource InfoValue}" Foreground="#2E7D32"/>
+                            <TextBlock Text="{Binding UpdateStatus}"
+                                       Foreground="{Binding UpdateStatusBrush}"
+                                       FontWeight="SemiBold"
+                                       Margin="0,2,0,10"/>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Version:"
-                                       Style="{StaticResource InfoLabel}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Version}"
-                                       Style="{StaticResource InfoValue}"/>
+                            <TextBlock Foreground="#E0E0E0">
+                                <Run Text="Prepared by: " FontWeight="Bold"/>
+                                <Run Text="Ahmed Khalaf (BIM Manager)"/>
+                            </TextBlock>
+                            <TextBlock Foreground="#E0E0E0" Margin="0,2,0,10">
+                                <Run Text="Mobile: " FontWeight="Bold"/>
+                                <Run Text="+966542554127"/>
+                            </TextBlock>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Model:"
-                                       Style="{StaticResource InfoLabel}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ModelName}"
-                                       Style="{StaticResource InfoValue}" TextTrimming="CharacterEllipsis"/>
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Selected:"
-                                       Style="{StaticResource InfoLabel}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1"
-                                       Text="{Binding SelectedCount, StringFormat={}{0} Elements}"
-                                       Style="{StaticResource InfoValue}"/>
-                        </Grid>
+                            <TextBlock Foreground="#E0E0E0">
+                                <Run Text="Contact Support: " FontWeight="Bold"/>
+                                <Hyperlink NavigateUri="mailto:engkhalaf7@gmail.com"
+                                           Foreground="#4FC3F7"
+                                           RequestNavigate="Hyperlink_RequestNavigate">
+                                    engkhalaf7@gmail.com
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Foreground="#E0E0E0" Margin="0,2,0,0">
+                                <Run Text="Website: " FontWeight="Bold"/>
+                                <Hyperlink NavigateUri="https://rukn-bim-website-opka.vercel.app/#top"
+                                           Foreground="#4FC3F7"
+                                           RequestNavigate="Hyperlink_RequestNavigate">
+                                    rukn-bim-website-opka.vercel.app
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
                     </Border>
 
                     <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"

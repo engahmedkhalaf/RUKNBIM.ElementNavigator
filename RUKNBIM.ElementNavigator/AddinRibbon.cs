@@ -2,7 +2,7 @@ using Autodesk.Navisworks.Api.Plugins;
 
 namespace RUKNBIM.ElementNavigator
 {
-    [PluginAttribute("ElementNavigatorAddin", "RUKN", DisplayName = "Element Navigator", ToolTip = "Open Element Navigator")]
+    [PluginAttribute("ElementNavigatorAddin", "RUKN", DisplayName = "RUKN Element Navigator", ToolTip = "Open RUKN Element Navigator")]
     [AddInPluginAttribute(AddInLocation.AddIn)]
     public class AddinRibbon : AddInPlugin
     {
