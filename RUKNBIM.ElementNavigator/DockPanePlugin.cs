@@ -3,7 +3,7 @@ using System.Windows.Forms.Integration;
 
 namespace RUKNBIM.ElementNavigator
 {
-    [PluginAttribute("ElementNavigator", "RUKN", DisplayName = "RUKN Element Navigator", ToolTip = "Search and highlight elements by ID")]
+    [PluginAttribute("ElementNavigator", "RUKN", DisplayName = "Element Navigator", ToolTip = "Search and highlight elements by ID")]
     [DockPanePluginAttribute(250, 400, FixedSize = false)]
     public class DockPanePlugin : Autodesk.Navisworks.Api.Plugins.DockPanePlugin
     {

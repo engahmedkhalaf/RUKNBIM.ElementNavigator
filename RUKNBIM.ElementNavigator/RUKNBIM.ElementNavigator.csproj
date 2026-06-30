@@ -30,7 +30,6 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,10 +41,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Images\ElementNavigatorAddin_16.ico">
+    <None Update="Images\ElementNavigatorAddin_16.png.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Images\ElementNavigatorAddin_32.png">
+    <None Update="Images\ElementNavigatorAddin_32.png.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">
@@ -59,7 +61,6 @@
     <Exec Command="xcopy &quot;$(TargetDir)*.*&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\&quot; /Y /I /S" />
     <Exec Command="xcopy &quot;$(ProjectDir)PackageContents.xml&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\&quot; /Y /I" />
     <Exec Command="if exist &quot;$(ProjectDir)Images\*.*&quot; xcopy &quot;$(ProjectDir)Images\*.*&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\Images\&quot; /Y /I /S" />
-    <Exec Command="if exist &quot;$(ProjectDir)ElementNavigatorAddin.RUKN\*.*&quot; xcopy &quot;$(ProjectDir)ElementNavigatorAddin.RUKN\*.*&quot; &quot;$(AppData)\Autodesk\ApplicationPlugins\RUKNBIM.ElementNavigator.bundle\Contents\RUKNBIM.ElementNavigator\ElementNavigatorAddin.RUKN\&quot; /Y /I /S" />
   </Target>
 
 </Project>

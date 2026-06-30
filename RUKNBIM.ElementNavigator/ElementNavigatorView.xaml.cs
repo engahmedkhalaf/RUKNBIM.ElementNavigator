@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Windows.Controls;
-using System.Windows.Navigation;
 
 namespace RUKNBIM.ElementNavigator
 {
@@ -12,10 +10,14 @@ namespace RUKNBIM.ElementNavigator
             DataContext = new ElementNavigatorViewModel();
         }
 
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
-            e.Handled = true;
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+                e.Handled = true;
+            }
+            catch { }
         }
     }
 }
